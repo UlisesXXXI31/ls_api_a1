@@ -5,7 +5,11 @@ const bcrypt = require('bcryptjs'); // ¡Nueva línea!
 
 // Aquí va la URL de conexión a tu base de datos MongoDB.
 // Reemplaza <nombre-de-tu-base-de-datos> con el nombre que quieras darle.
-const uri = 'mongodb://127.0.0.1:27017/vocabulario-app';
+const uri = process.env.MONGODB_URI;
+
+mongoose.connect(uri)
+  .then(() => console.log('Conexión exitosa a MongoDB Atlas'))
+  .catch(err => console.error('Error de conexión a MongoDB Atlas:', err));
 
 mongoose.connect(uri)
   .then(() => console.log('Conexión exitosa a MongoDB'))
@@ -13,7 +17,10 @@ mongoose.connect(uri)
 const User = require('./models/user');
 const Progress = require('./models/progress');
 const app = express();
-app.use(cors()); // <-- ¡Y esta es la otra nueva línea!
+/ Configura CORS para permitir peticiones SOLAMENTE desde tu frontend de GitHub
+app.use(cors({
+  origin: 'https://ulisesxxxi31.github.io'
+}));
 app.use(express.json());
 const port = 3000;
 
@@ -21,9 +28,7 @@ app.get('/', (req, res) => {
   res.send('¡Hola, mundo desde el servidor!');
 });
 
-app.listen(port, () => {
-  console.log(`Servidor escuchando en http://localhost:${port}`);
-});
+
 // Ruta para crear datos de prueba (temporal)
 app.get('/api/seed', async (req, res) => {
   try {
@@ -196,4 +201,5 @@ app.get('/api/progress/:userId', async (req, res) => {
     console.error('Error al obtener el progreso del usuario:', error);
     res.status(500).json({ message: 'Error interno del servidor.' });
   }
+  module.exports = app;
 });
