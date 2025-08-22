@@ -19,8 +19,8 @@ app.use(cors({
 app.use(express.json());
 
 
-const User = require('./models/user');
-const Progress = require('./models/progress');
+const User = require('../models/user');
+const Progress = require('../models/progress');
 const app = express();
 
 
@@ -204,3 +204,4 @@ app.get('/api/progress/:userId', async (req, res) => {
   }
   module.exports = app;
 })
+
