@@ -30,32 +30,41 @@ app.get('/', (req, res) => {
   res.send('¡Hola, mundo desde el servidor!');
 });
 
-// Ruta para crear datos de prueba (temporal)
+// REEMPLAZA TU RUTA /api/seed CON ESTA VERSIÓN CORREGIDA
+
 app.get('/api/seed', async (req, res) => {
   try {
+    console.log("Iniciando la creación de datos de prueba (seed)...");
+
+    // 1. Hashear la contraseña
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash('password123', salt);
 
-    // Crear un usuario de prueba (profesor)
+    // 2. Crear un usuario de prueba (profesor)
     const testUser = new User({
         name: 'Profesor de Prueba',
-        email: 'prof.prueba@seed.com',
+        email: 'prof.prueba@seed.com', // Un email único para evitar errores
         password: hashedPassword,
         role: 'teacher'
     });
     await testUser.save();
+    console.log("Usuario de prueba creado con éxito.");
 
-    // Crear un registro de progreso para el usuario
+    // 3. (Opcional) Crear un registro de progreso para ese usuario
     const testProgress = new Progress({
       user: testUser._id,
-      taskName: 'Lección 1: Vocabulario básico',
-      score: 95,
+      taskName: 'Lección de Prueba',
+      score: 100,
       completed: true
     });
     await testProgress.save();
+    console.log("Progreso de prueba creado con éxito.");
 
-    res.status(200).json({ message: 'Datos de prueba (Profesor y progreso) creados con éxito' });
+    res.status(200).json({ message: 'Datos de prueba creados con éxito. Ya puedes hacer login.' });
+
   } catch (error) {
+    // Este error aparecerá en los logs de Vercel si algo falla
+    console.error("Error al crear datos de prueba:", error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -175,3 +184,4 @@ app.get('/api/progress/:userId', async (req, res) => {
 
 // --- 7. Export de la App ---
 module.exports = app;
+
