@@ -7,16 +7,19 @@ const bcrypt = require('bcryptjs'); // ¡Nueva línea!
 // Reemplaza <nombre-de-tu-base-de-datos> con el nombre que quieras darle.
 const uri = process.env.MONGODB_URI;
 
-mongoose.connect(uri)
-  .then(() => console.log('Conexión exitosa a MongoDB Atlas'))
-  .catch(err => console.error('Error de conexión a MongoDB Atlas:', err));
-
 app.use(express.json());
 
 // Configura CORS para permitir peticiones SOLAMENTE desde tu frontend de GitHub
 app.use(cors({
   origin: 'https://ulisesxxxi31.github.io'
 }));
+
+mongoose.connect(uri)
+  .then(() => console.log('Conexión exitosa a MongoDB Atlas'))
+  .catch(err => console.error('Error de conexión a MongoDB Atlas:', err));
+
+
+
 
 
 const User = require('../models/user');
@@ -204,5 +207,6 @@ app.get('/api/progress/:userId', async (req, res) => {
   }
   module.exports = app;
 })
+
 
 
