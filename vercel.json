@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "./api/server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/api/server.js"
+    }
+  ]
+}```
+*(**Recuerda:** Si tu archivo de servidor se llama de otra forma, como `index.js`, cambia `"./api/server.js"` por `"./api/index.js"` en los dos sitios donde aparece).*
+
+Una vez que lo reemplaces y lo guardes, el error de "Contenido JSON no válido" desaparecerá y podrás continuar con la subida a GitHub y el despliegue en Vercel.
