@@ -11,18 +11,19 @@ mongoose.connect(uri)
   .then(() => console.log('Conexión exitosa a MongoDB Atlas'))
   .catch(err => console.error('Error de conexión a MongoDB Atlas:', err));
 
-mongoose.connect(uri)
-  .then(() => console.log('Conexión exitosa a MongoDB'))
-  .catch(err => console.error('Error de conexión a MongoDB:', err));
-const User = require('./models/user');
-const Progress = require('./models/progress');
-const app = express();
-/ Configura CORS para permitir peticiones SOLAMENTE desde tu frontend de GitHub
+// Configura CORS para permitir peticiones SOLAMENTE desde tu frontend de GitHub
 app.use(cors({
   origin: 'https://ulisesxxxi31.github.io'
 }));
+
 app.use(express.json());
-const port = 3000;
+
+
+const User = require('./models/user');
+const Progress = require('./models/progress');
+const app = express();
+
+
 
 app.get('/', (req, res) => {
   res.send('¡Hola, mundo desde el servidor!');
