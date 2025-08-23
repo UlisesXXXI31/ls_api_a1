@@ -69,13 +69,35 @@ app.get('/api/seed', async (req, res) => {
   }
 });
 
+// REEMPLAZA TU RUTA DE REGISTRO CON ESTA
+
 app.post('/api/users/register', async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
-    const newUser = new User({ name, email, password, role });
+
+    // 1. Hashear la contraseña antes de guardarla
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // 2. Crear el nuevo usuario con la contraseña hasheada
+    const newUser = new User({
+        name,
+        email,
+        password: hashedPassword, // ¡Importante! Usar la contraseña encriptada
+        role
+    });
+    
+    // 3. Guardar el usuario en la base de datos
     await newUser.save();
+    
     res.status(201).json({ message: 'Usuario registrado con éxito' });
+
   } catch (error) {
+    // Manejo de error para email duplicado (muy útil)
+    if (error.code === 11000) {
+      return res.status(400).json({ message: 'El correo electrónico ya está registrado.' });
+    }
+    // Para otros errores
     res.status(500).json({ error: error.message });
   }
 });
@@ -184,5 +206,6 @@ app.get('/api/progress/:userId', async (req, res) => {
 
 // --- 7. Export de la App ---
 module.exports = app;
+
 
 
