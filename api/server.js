@@ -53,7 +53,7 @@ app.get('/api/seed', async (req, res) => {
     // 3. (Opcional) Crear un registro de progreso para ese usuario
     const testProgress = new Progress({
       user: testUser._id,
-      taskName: 'Lección de Prueba',
+      lessonName: 'Lección de Prueba',
       score: 100,
       completed: true
     });
@@ -184,4 +184,5 @@ app.get('/api/progress/:userId', async (req, res) => {
 
 // --- 7. Export de la App ---
 module.exports = app;
+
 
