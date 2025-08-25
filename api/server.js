@@ -54,6 +54,7 @@ app.get('/api/seed', async (req, res) => {
     const testProgress = new Progress({
       user: testUser._id,
       lessonName: 'Lección de Prueba',
+      taskName: 'Prueba iniciual A1',
       score: 100,
       completed: true
     });
@@ -206,6 +207,7 @@ app.get('/api/progress/:userId', async (req, res) => {
 
 // --- 7. Export de la App ---
 module.exports = app;
+
 
 
 
