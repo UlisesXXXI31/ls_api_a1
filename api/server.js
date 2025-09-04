@@ -107,7 +107,7 @@ app.post('/api/progress', async (req, res) => {
   try {
     const { userId, taskName, score, completed } = req.body;
     const newProgress = new Progress({
-      user: userId,
+      user: user,
       taskName,
       score,
       completed
@@ -207,6 +207,7 @@ app.get('/api/progress/:userId', async (req, res) => {
 
 // --- 7. Export de la App ---
 module.exports = app;
+
 
 
 
