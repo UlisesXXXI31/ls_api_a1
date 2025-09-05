@@ -103,20 +103,33 @@ app.post('/api/users/register', async (req, res) => {
   }
 });
 
+// En backend/api/server.js
+
 app.post('/api/progress', async (req, res) => {
-  try {
-    const { userId, taskName, score, completed } = req.body;
-    const newProgress = new Progress({
-      user: user,
-      taskName,
-      score,
-      completed
-    });
-    await newProgress.save();
-    res.status(201).json({ message: 'Progreso guardado con éxito' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+    try {
+        // Asegúrate de que estás extrayendo todos los campos que envías
+        const { user, lessonName, taskName, score, completed } = req.body;
+
+        // Validar que los datos necesarios están presentes
+        if (!user || !lessonName || !taskName || score === undefined) {
+            return res.status(400).json({ message: "Faltan datos para guardar el progreso." });
+        }
+
+        const newProgress = new Progress({
+            user,
+            lessonName,
+            taskName,
+            score,
+            completed
+        });
+        
+        await newProgress.save();
+        res.status(201).json({ message: 'Progreso guardado con éxito' });
+    } catch (error) {
+        // Este log es crucial y aparecerá en Vercel
+        console.error("ERROR AL GUARDAR PROGRESO:", error); 
+        res.status(500).json({ error: error.message });
+    }
 });
 
 app.get('/api/progress/students', async (req, res) => {
@@ -207,6 +220,7 @@ app.get('/api/progress/:userId', async (req, res) => {
 
 // --- 7. Export de la App ---
 module.exports = app;
+
 
 
 
