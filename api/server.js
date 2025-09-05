@@ -220,14 +220,22 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
+// En backend/api/server.js
+
 app.get('/api/progress/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
-    const progressHistory = await Progress.find({ userId: userId }).sort({ date: 1 });
+
+    // --- ¡CORRECCIÓN AQUÍ! ---
+    // Buscamos en el campo 'user' y ordenamos por 'completedAt'.
+    const progressHistory = await Progress.find({ user: userId }).sort({ completedAt: 1 });
+
     if (!progressHistory || progressHistory.length === 0) {
-      return res.status(404).json({ message: 'No se encontró historial de progreso.' });
+      return res.status(404).json({ message: 'No se encontró historial de progreso para este usuario.' });
     }
+    
     res.status(200).json({ progress: progressHistory });
+
   } catch (error) {
     console.error('Error al obtener el progreso del usuario:', error);
     res.status(500).json({ message: 'Error interno del servidor.' });
@@ -237,6 +245,7 @@ app.get('/api/progress/:userId', async (req, res) => {
 
 // --- 7. Export de la App ---
 module.exports = app;
+
 
 
 
