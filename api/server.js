@@ -103,31 +103,40 @@ app.post('/api/users/register', async (req, res) => {
   }
 });
 
-// En backend/api/server.js
+// REEMPLAZA TU RUTA DE PROGRESO CON ESTA VERSIÓN INTELIGENTE
 
 app.post('/api/progress', async (req, res) => {
     try {
-        // Asegúrate de que estás extrayendo todos los campos que envías
         const { user, lessonName, taskName, score, completed } = req.body;
 
-        // Validar que los datos necesarios están presentes
-        if (!user || !lessonName || !taskName || score === undefined) {
-            return res.status(400).json({ message: "Faltan datos para guardar el progreso." });
+        // 1. Definimos los datos que queremos guardar/actualizar
+        const updateData = {
+            $inc: { score: score }, // $inc incrementa la puntuación en lugar de reemplazarla
+            $set: { completedAt: new Date() } // Siempre actualizamos la fecha
+        };
+        
+        // Solo marcamos como 'completed' si el frontend nos dice que es true
+        // y no lo volvemos a poner a false si ya estaba en true.
+        if (completed) {
+            updateData.$set.completed = true;
         }
 
-        const newProgress = new Progress({
-            user,
-            lessonName,
-            taskName,
-            score,
-            completed
-        });
+        // 2. Usamos findOneAndUpdate
+        // Buscará un documento que coincida con user, lessonName y taskName.
+        const updatedProgress = await Progress.findOneAndUpdate(
+            { user: user, lessonName: lessonName, taskName: taskName }, // El filtro para buscar
+            updateData, // Los datos a actualizar/incrementar
+            {
+                new: true,    // Devuelve el documento después de actualizarlo
+                upsert: true, // ¡La magia está aquí! Si no lo encuentra, lo CREA.
+                setDefaultsOnInsert: true // Aplica los valores por defecto del schema si se crea
+            }
+        );
         
-        await newProgress.save();
-        res.status(201).json({ message: 'Progreso guardado con éxito' });
+        res.status(200).json({ message: 'Progreso guardado/actualizado con éxito', progress: updatedProgress });
+
     } catch (error) {
-        // Este log es crucial y aparecerá en Vercel
-        console.error("ERROR AL GUARDAR PROGRESO:", error); 
+        console.error("### ERROR AL GUARDAR PROGRESO:", error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -220,6 +229,7 @@ app.get('/api/progress/:userId', async (req, res) => {
 
 // --- 7. Export de la App ---
 module.exports = app;
+
 
 
 
