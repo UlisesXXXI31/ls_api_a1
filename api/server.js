@@ -103,40 +103,48 @@ app.post('/api/users/register', async (req, res) => {
   }
 });
 
-// REEMPLAZA TU RUTA DE PROGRESO CON ESTA VERSIÓN INTELIGENTE
+// REEMPLAZA TU RUTA DE PROGRESO CON ESTA VERSIÓN ROBUSTA
 
 app.post('/api/progress', async (req, res) => {
+    console.log("--- Petición POST a /api/progress recibida ---");
+    
     try {
         const { user, lessonName, taskName, score, completed } = req.body;
+        console.log("Datos recibidos:", { user, lessonName, taskName, score, completed });
 
-        // 1. Definimos los datos que queremos guardar/actualizar
-        const updateData = {
-            $inc: { score: score }, // $inc incrementa la puntuación en lugar de reemplazarla
-            $set: { completedAt: new Date() } // Siempre actualizamos la fecha
-        };
-        
-        // Solo marcamos como 'completed' si el frontend nos dice que es true
-        // y no lo volvemos a poner a false si ya estaba en true.
+        if (!user || !lessonName || !taskName || score === undefined) {
+            console.log("Validación fallida: Faltan datos.");
+            return res.status(400).json({ message: "Faltan datos para guardar el progreso." });
+        }
+
+        const filter = { user, lessonName, taskName };
+        const updateData = { $inc: { score: score }, $set: { completedAt: new Date() } };
         if (completed) {
             updateData.$set.completed = true;
         }
 
-        // 2. Usamos findOneAndUpdate
-        // Buscará un documento que coincida con user, lessonName y taskName.
+        console.log("Intentando findOneAndUpdate con el filtro:", filter);
+        console.log("Y los datos de actualización:", updateData);
+
         const updatedProgress = await Progress.findOneAndUpdate(
-            { user: user, lessonName: lessonName, taskName: taskName }, // El filtro para buscar
-            updateData, // Los datos a actualizar/incrementar
-            {
-                new: true,    // Devuelve el documento después de actualizarlo
-                upsert: true, // ¡La magia está aquí! Si no lo encuentra, lo CREA.
-                setDefaultsOnInsert: true // Aplica los valores por defecto del schema si se crea
-            }
+            filter,
+            updateData,
+            { new: true, upsert: true, setDefaultsOnInsert: true }
         );
-        
-        res.status(200).json({ message: 'Progreso guardado/actualizado con éxito', progress: updatedProgress });
+
+        // --- ¡VERIFICACIÓN CRUCIAL! ---
+        if (updatedProgress) {
+            console.log("¡Éxito! Documento guardado/actualizado:", updatedProgress);
+            res.status(200).json({ message: 'Progreso guardado/actualizado con éxito', progress: updatedProgress });
+        } else {
+            // Esto solo ocurriría si 'upsert: true' fallara, lo cual es muy raro.
+            console.error("ERROR: findOneAndUpdate no devolvió un documento.");
+            throw new Error("No se pudo guardar el progreso en la base de datos.");
+        }
+        // ---------------------------------
 
     } catch (error) {
-        console.error("### ERROR AL GUARDAR PROGRESO:", error);
+        console.error("### ERROR CATASTRÓFICO EN LA RUTA /api/progress:", error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -229,6 +237,7 @@ app.get('/api/progress/:userId', async (req, res) => {
 
 // --- 7. Export de la App ---
 module.exports = app;
+
 
 
 
