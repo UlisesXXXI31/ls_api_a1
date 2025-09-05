@@ -107,27 +107,47 @@ app.post('/api/users/register', async (req, res) => {
 
 app.post('/api/progress', async (req, res) => {
     try {
-        // Asegúrate de que estás extrayendo todos los campos que envías
         const { user, lessonName, taskName, score, completed } = req.body;
 
-        // Validar que los datos necesarios están presentes
-        if (!user || !lessonName || !taskName || score === undefined) {
-            return res.status(400).json({ message: "Faltan datos para guardar el progreso." });
+        // Buscamos un progreso existente para este usuario, lección y tarea
+        const existingProgress = await Progress.findOne({
+            user: user,
+            lessonName: lessonName,
+            taskName: taskName
+        });
+
+        if (existingProgress) {
+            // --- SI YA EXISTE, LO ACTUALIZAMOS ---
+            
+            // Actualizamos la puntuación solo si la nueva es más alta
+            existingProgress.score = Math.max(existingProgress.score, score); 
+            
+            // Si no estaba completado y ahora sí lo está, lo marcamos
+            if (!existingProgress.completed && completed) {
+                existingProgress.completed = true;
+            }
+            
+            // Actualizamos la fecha
+            existingProgress.completedAt = new Date();
+            
+            await existingProgress.save();
+            res.status(200).json({ message: 'Progreso actualizado con éxito', progress: existingProgress });
+
+        } else {
+            // --- SI NO EXISTE, CREAMOS UNO NUEVO ---
+            const newProgress = new Progress({
+                user,
+                lessonName,
+                taskName,
+                score,
+                completed
+            });
+            await newProgress.save();
+            res.status(201).json({ message: 'Progreso guardado con éxito', progress: newProgress });
         }
 
-        const newProgress = new Progress({
-            user,
-            lessonName,
-            taskName,
-            score,
-            completed
-        });
-        
-        await newProgress.save();
-        res.status(201).json({ message: 'Progreso guardado con éxito' });
     } catch (error) {
-        // Este log es crucial y aparecerá en Vercel
-        console.error("ERROR AL GUARDAR PROGRESO:", error); 
+        console.error("ERROR AL GUARDAR PROGRESO:", error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -220,6 +240,7 @@ app.get('/api/progress/:userId', async (req, res) => {
 
 // --- 7. Export de la App ---
 module.exports = app;
+
 
 
 
