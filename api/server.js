@@ -99,7 +99,7 @@ app.post('/api/users/register', async (req, res) => {
       return res.status(400).json({ message: 'El correo electrónico ya está registrado.' });
     }
     // Para otros errores
-    res.status(500).json({ error: error.message });
+   res.status(500).json({ message: 'Error interno del servidor. ' + error.message });
   }
 });
 
@@ -245,6 +245,7 @@ app.get('/api/progress/:userId', async (req, res) => {
 
 // --- 7. Export de la App ---
 module.exports = app;
+
 
 
 
